@@ -26,5 +26,15 @@ namespace FitGym.Services
             _members.Add(member);
             return member;
         }
+
+        public IEnumerable<Member> GetAll()
+        {
+            return _members;
+        }
+
+        public Member? GetById(int id)
+        {
+            return _members.FirstOrDefault(m => m.Id == id);
+        }
     }
 }
