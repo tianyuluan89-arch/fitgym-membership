@@ -6,9 +6,12 @@ namespace FitGym.Services
     {
         private readonly List<Subscription> _subscriptions = new();
 
+        public void SeedSubscription(Subscription s) => _subscriptions.Add(s);
+                public void ClearSubscriptions() => _subscriptions.Clear();
+
+
         public Subscription CreateSubscription(int memberId, int planId)
         {
-            // A subscription is created but not yet active until payment succeeds (402 mapped in controller)
             var subscription = new Subscription
             {
                 MemberId = memberId,
@@ -23,7 +26,6 @@ namespace FitGym.Services
 
         public Subscription? GetActiveSubscription(int memberId)
         {
-            // Only a subscription with Status Active and a future EndDate is considered valid
             return _subscriptions.FirstOrDefault(s =>
                 s.MemberId == memberId &&
                 s.Status == "Active" &&

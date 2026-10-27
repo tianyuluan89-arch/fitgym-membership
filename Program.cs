@@ -9,7 +9,6 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Register the service layer
 builder.Services.AddScoped<IMemberService, MemberService>();
 builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
@@ -50,3 +49,4 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+public partial class Program {}

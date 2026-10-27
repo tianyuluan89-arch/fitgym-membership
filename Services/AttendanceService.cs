@@ -6,6 +6,8 @@ namespace FitGym.Services
     {
         private readonly List<Attendance> _attendance = new();
 
+        public void SeedAttendance(Attendance a) => _attendance.Add(a);
+
         public Attendance CheckIn(int memberId, int classId)
         {
             // Reject duplicate check-in for the same member and class (HTTP 409 mapped by controller)

@@ -12,8 +12,15 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.9.0" />
   </ItemGroup>
 
-    <ItemGroup>
+        <ItemGroup>
     <Compile Remove="FitGym.Tests\**" />
+    <Content Remove="FitGym.Tests\**" />
+    <None Remove="FitGym.Tests\**" />
+    <EmbeddedResource Remove="FitGym.Tests\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="FitGym.Tests" />
   </ItemGroup>
 
 
