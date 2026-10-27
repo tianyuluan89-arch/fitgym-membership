@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using FitGym.Models;
 using FitGym.Services;
@@ -11,22 +12,29 @@ namespace FitGym.Controllers
     public class BookingsController : ControllerBase
     {
         private readonly IBookingService _bookingService;
+        private readonly ISubscriptionService _subscriptionService;
 
-        public BookingsController(IBookingService bookingService)
+        public BookingsController(IBookingService bookingService, ISubscriptionService subscriptionService)
         {
             _bookingService = bookingService;
+            _subscriptionService = subscriptionService;
         }
 
         /// <summary>
         /// Book a class for the current member.
         /// POST: api/workout-classes/{classId}/book
         /// </summary>
-        [HttpPost("api/workout-classes/{classId}/book")]
+        [HttpPost("/api/workout-classes/{classId}/book")]
         [Authorize(Roles = "Member")]
         public ActionResult<Booking> Book(int classId)
         {
             // In this course version the member id comes from the route or a fixed value.
             int memberId = 1;
+            var active = _subscriptionService.GetActiveSubscription(memberId);
+            if (active == null)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new { error = "ACTIVE_SUBSCRIPTION_REQUIRED" });
+            }
             try
             {
                 var booking = _bookingService.BookClass(memberId, classId);

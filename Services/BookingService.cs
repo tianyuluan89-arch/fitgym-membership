@@ -7,6 +7,9 @@ namespace FitGym.Services
         private readonly List<Booking> _bookings = new();
         private readonly List<WorkoutClass> _classes = new();
 
+        public void SeedClass(WorkoutClass c) => _classes.Add(c);
+        public void SeedBooking(Booking b) => _bookings.Add(b);
+
         public Booking BookClass(int memberId, int classId)
         {
             var workoutClass = _classes.FirstOrDefault(c => c.Id == classId);

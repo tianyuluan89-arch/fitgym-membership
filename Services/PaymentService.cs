@@ -7,6 +7,13 @@ namespace FitGym.Services
         private readonly List<Payment> _payments = new();
         private readonly List<Subscription> _subscriptions = new();
 
+        public void SeedSubscription(Subscription s) => _subscriptions.Add(s);
+
+        public Subscription? GetSubscription(int subscriptionId)
+        {
+            return _subscriptions.FirstOrDefault(s => s.Id == subscriptionId);
+        }
+
         public Payment RecordPayment(int subscriptionId, decimal amount, string method)
         {
             var subscription = _subscriptions.FirstOrDefault(s => s.Id == subscriptionId);
