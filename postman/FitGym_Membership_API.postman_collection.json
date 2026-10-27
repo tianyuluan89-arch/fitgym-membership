@@ -1,0 +1,260 @@
+{
+  "info": {
+    "name": "FitGym Membership API",
+    "description": "Postman collection for the FitGym gym membership system (course: Introduction to Software Engineering 2026).\n\nBase URL: http://localhost:5116 (ASP.NET Core http profile). For https use https://localhost:7232.\n\nAuth: this collection uses JWT Bearer tokens. After Register/Login, copy the returned token into the {{memberToken}} variable (collection-level). For Trainer / Receptionist role checks, generate a token with the same secret (FitGym_Course_Secret_Key_At_Least_32_Characters_Long_2026) and put it in {{trainerToken}} / {{receptionistToken}}.\n\nEach request documents the expected status code and key response fields. See Wiki article 05 (Verification and Release Checklist) for the full risk-focused checklist.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5116"
+    },
+    {
+      "key": "memberToken",
+      "value": ""
+    },
+    {
+      "key": "trainerToken",
+      "value": ""
+    },
+    {
+      "key": "receptionistToken",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register a new member",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Ivan Ivanov\",\n  \"email\": \"ivan.ivanov@example.com\",\n  \"phone\": \"+79001112233\",\n  \"dateOfBirth\": \"2000-01-15T00:00:00\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            },
+            "description": "Register a new member and receive an auth token.\n\nExpected: 200 OK with body { \"token\": \"...\" }\n- Key response fields: token (JWT).\nError case: 409 Conflict with { \"error\": \"Email is already registered.\" } when the email already exists."
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Simplified login for the course. Provide a user id and receive a Member token.\n\nExpected: 200 OK with body { \"token\": \"...\" }\n- Key response field: token (JWT)."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Membership Plans",
+      "item": [
+        {
+          "name": "Get all membership plans",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{memberToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/membership-plans",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "membership-plans"]
+            },
+            "description": "List available membership plans. Requires an authenticated token.\n\nExpected: 200 OK with body [ { \"id\": 1, \"name\": \"Monthly\", \"durationMonths\": 1, \"price\": 30, \"maxMonthlyBookings\": 8 }, ... ]\n- Key response fields: id, name, durationMonths, price, maxMonthlyBookings."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Subscriptions",
+      "item": [
+        {
+          "name": "Create subscription",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{receptionistToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"memberId\": 1,\n  \"planId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/subscriptions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscriptions"]
+            },
+            "description": "Create a subscription for a member (payment handled separately). Roles: Member or Receptionist.\n\nExpected: 201 Created with body containing the subscription.\n- Key response fields: id, memberId, planId, status (Active), startDate, endDate."
+          },
+          "response": []
+        },
+        {
+          "name": "Get active subscription",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{memberToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/subscriptions/active/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscriptions", "active", "1"]
+            },
+            "description": "Get the active subscription for a member (memberId = 1 here). Requires authentication.\n\nExpected: 200 OK with the subscription body.\n- Key response fields: id, memberId, planId, status, startDate, endDate.\nError case: 404 Not Found when the member has no active subscription."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "Record payment and activate subscription",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{receptionistToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subscriptionId\": 1,\n  \"amount\": 30,\n  \"method\": \"Card\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/payments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments"]
+            },
+            "description": "Record a successful payment and activate the linked subscription. Roles: Receptionist or Member.\n\nExpected: 201 Created with body containing the payment.\n- Key response fields: id, subscriptionId, amount, method, status (after success the subscription becomes Active).\nError case: 404 Not Found with { \"error\": \"Subscription not found.\" } when the subscription id is unknown."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Bookings / Classes",
+      "item": [
+        {
+          "name": "Book a class",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{memberToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/workout-classes/1/book",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "workout-classes", "1", "book"]
+            },
+            "description": "Book a class for the current member (member id fixed to 1 in this course version). Role: Member. Requires an active subscription.\n\nExpected: 201 Created with body containing the booking.\n- Key response fields: id, memberId, classId, status (Booked), bookedAt.\nError cases:\n- 403 Forbidden with { \"error\": \"ACTIVE_SUBSCRIPTION_REQUIRED\" } when no active subscription.\n- 409 Conflict with { \"error\": \"CLASS_FULL\" } or { \"error\": \"SCHEDULE_CONFLICT\" }.\n- 404 Not Found when the class does not exist."
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel a booking",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{memberToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings/1/cancel",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bookings", "1", "cancel"]
+            },
+            "description": "Cancel a booking by id (id = 1 here). Requires authentication.\n\nExpected: 200 OK when the booking is cancelled.\nError case: 404 Not Found when the booking id does not exist."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Attendance",
+      "item": [
+        {
+          "name": "Record check-in",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{trainerToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"memberId\": 1,\n  \"classId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/attendance",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "attendance"]
+            },
+            "description": "Record a member check-in for a class. Role: Trainer.\n\nExpected: 201 Created with body containing the attendance record.\n- Key response fields: id, memberId, classId, status (Present), checkedInAt.\nError case: 409 Conflict with { \"error\": \"Member is already checked in for this class.\" } on a duplicate check-in."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
